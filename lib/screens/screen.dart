@@ -6,7 +6,7 @@ class book extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(color: Colors.red),
+      body: Container(color: const Color.fromARGB(255, 0, 0, 0)),
     );
   }
 }
