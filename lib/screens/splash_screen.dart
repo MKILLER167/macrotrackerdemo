@@ -1,244 +1,165 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-
+import '../theme/app_theme.dart';
 import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _rotationController;
-  late AnimationController _fadeController;
-  late AnimationController _scaleController;
-  late AnimationController _progressController;
-
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _progressAnimation;
-
-  final List<IconData> _nutritionIcons = [
-    Icons.restaurant,
-    Icons.local_dining,
-    Icons.water_drop,
-    Icons.eco,
-    Icons.apple,
-    Icons.local_cafe,
-  ];
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  late final AnimationController _orbit  = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
+  late final AnimationController _enter  = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+  late final AnimationController _bar    = AnimationController(vsync: this, duration: const Duration(seconds: 3))..forward();
+  late final Animation<double> _fadeIn   = CurvedAnimation(parent: _enter, curve: Curves.easeOut);
+  late final Animation<double> _scaleIn  = Tween(begin: 0.7, end: 1.0).animate(CurvedAnimation(parent: _enter, curve: Curves.easeOutBack));
 
   @override
   void initState() {
     super.initState();
-    _setupAnimations();
-    _navigateToNext();
-  }
-
-  void _setupAnimations() {
-    // Rotation animation
-    _rotationController =
-        AnimationController(duration: const Duration(seconds: 2), vsync: this)
-          ..repeat();
-    _rotationAnimation =
-        Tween<double>(begin: 0, end: 2 * math.pi).animate(_rotationController);
-
-    // Fade animation
-    _fadeController = AnimationController(
-        duration: const Duration(milliseconds: 1500), vsync: this);
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
-
-    // Scale animation
-    _scaleController = AnimationController(
-        duration: const Duration(milliseconds: 1000), vsync: this);
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-        CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut));
-
-    // Progress animation
-    _progressController = AnimationController(
-        duration: const Duration(seconds: 2, milliseconds: 500), vsync: this);
-    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _progressController, curve: Curves.easeInOut));
-
-    _fadeController.forward();
-    _scaleController.forward();
-    _progressController.forward();
-  }
-
-  Future<void> _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 3));
-
-    if (!mounted) return;
-
-    // Force MainScreen for now since we mock a user in Cubit
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainScreen()),
-    );
+    _enter.forward();
+    Future.delayed(const Duration(milliseconds: 3200), () {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 700),
+          pageBuilder: (_, __, ___) => const MainScreen(),
+          transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),
+        ),
+      );
+    });
   }
 
   @override
   void dispose() {
-    _rotationController.dispose();
-    _fadeController.dispose();
-    _scaleController.dispose();
-    _progressController.dispose();
+    _orbit.dispose();
+    _enter.dispose();
+    _bar.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
+      backgroundColor: AppTheme.bg,
       body: Stack(
         children: [
-          ...List.generate(20, (index) => _buildParticle(index)),
+          // radial glow behind logo
+          Positioned(
+            top: size.height * 0.28,
+            left: size.width / 2 - 120,
+            child: Container(
+              width: 240, height: 240,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(colors: [
+                  AppTheme.mint.withValues(alpha: 0.18),
+                  Colors.transparent,
+                ]),
+              ),
+            ),
+          ),
+          // orbit ring
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AnimatedBuilder(
-                  animation: _rotationAnimation,
-                  builder: (context, child) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: List.generate(_nutritionIcons.length, (index) {
-                        final angle =
-                            (2 * math.pi / _nutritionIcons.length) * index +
-                                _rotationAnimation.value;
-                        final radius = 80.0;
-                        final x = math.cos(angle) * radius;
-                        final y = math.sin(angle) * radius * 0.5;
-
-                        return Transform.translate(
-                          offset: Offset(x, y),
-                          child: Transform.scale(
-                            scale: (math.cos(angle) + 1.5) / 2.5,
-                            child: Opacity(
-                              opacity: (math.cos(angle) + 1.5) / 2.5,
-                              child: Icon(
-                                _nutritionIcons[index],
-                                size: 40,
-                                color: const Color(0xFF34D399),
-                              ),
+            child: AnimatedBuilder(
+              animation: _orbit,
+              builder: (_, __) {
+                return SizedBox(
+                  width: 200, height: 200,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: List.generate(6, (i) {
+                      final angle = (math.pi * 2 / 6) * i + _orbit.value * math.pi * 2;
+                      return Transform.translate(
+                        offset: Offset(math.cos(angle) * 88, math.sin(angle) * 88),
+                        child: Opacity(
+                          opacity: ((math.cos(angle) + 1) / 2).clamp(0.25, 1.0),
+                          child: Container(
+                            width: 10, height: 10,
+                            decoration: BoxDecoration(
+                              color: AppTheme.mint,
+                              shape: BoxShape.circle,
+                              boxShadow: [BoxShadow(color: AppTheme.mint.withValues(alpha: 0.6), blurRadius: 8, spreadRadius: 1)],
                             ),
                           ),
-                        );
-                      }),
-                    );
-                  },
-                ),
-                const SizedBox(height: 60),
-                ScaleTransition(
-                  scale: _scaleAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Column(
-                      children: [
-                        Text(
-                          'NutriTracker',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 2,
-                            shadows: [
-                              Shadow(
-                                color: const Color(0xFF34D399)
-                                    .withValues(alpha: 0.5),
-                                blurRadius: 20,
-                              ),
-                            ],
+                        ),
+                      );
+                    }),
+                  ),
+                );
+              },
+            ),
+          ),
+          // logo + text
+          Center(
+            child: ScaleTransition(
+              scale: _scaleIn,
+              child: FadeTransition(
+                opacity: _fadeIn,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Icon box
+                    Container(
+                      width: 80, height: 80,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [AppTheme.mint, AppTheme.violet], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(color: AppTheme.mint.withValues(alpha: 0.5), blurRadius: 28, spreadRadius: 2),
+                          BoxShadow(color: AppTheme.violet.withValues(alpha: 0.3), blurRadius: 48, spreadRadius: 4),
+                        ],
+                      ),
+                      child: const Icon(Icons.eco_rounded, color: Colors.black, size: 42),
+                    ),
+                    const SizedBox(height: 28),
+                    ShaderMask(
+                      shaderCallback: (b) => const LinearGradient(colors: [AppTheme.mint, AppTheme.lilac]).createShader(b),
+                      child: const Text(
+                        'NutriTracker',
+                        style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -1),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Your science-based nutrition engine',
+                      style: TextStyle(color: AppTheme.muted, fontSize: 14, letterSpacing: 0.2),
+                    ),
+                    const SizedBox(height: 52),
+                    // Progress bar
+                    AnimatedBuilder(
+                      animation: _bar,
+                      builder: (_, __) => SizedBox(
+                        width: 180,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: _bar.value,
+                            minHeight: 3,
+                            backgroundColor: AppTheme.faint,
+                            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.mint),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Your Nutrition Journey Starts Here',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 80),
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SizedBox(
-                    width: 200,
-                    child: Column(
-                      children: [
-                        AnimatedBuilder(
-                          animation: _progressAnimation,
-                          builder: (context, child) {
-                            return LinearProgressIndicator(
-                              value: _progressAnimation.value,
-                              backgroundColor:
-                                  Colors.white.withValues(alpha: 0.2),
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF34D399),
-                              ),
-                              minHeight: 4,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
+            ),
+          ),
+          // bottom version tag
+          Positioned(
+            bottom: 32, left: 0, right: 0,
+            child: FadeTransition(
+              opacity: _fadeIn,
+              child: const Text('v1.0  •  Powered by Mifflin-St Jeor', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.faint, fontSize: 11)),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildParticle(int index) {
-    final random = math.Random(index);
-    final size = random.nextDouble() * 4 + 2;
-    final left = random.nextDouble() * MediaQuery.of(context).size.width;
-    final top = random.nextDouble() * MediaQuery.of(context).size.height;
-    final duration = random.nextInt(3) + 2;
-
-    return AnimatedBuilder(
-      animation: _fadeController,
-      builder: (context, child) {
-        return Positioned(
-          left: left,
-          top: top,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.2, end: 1.0),
-            duration: Duration(seconds: duration),
-            curve: Curves.easeInOut,
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value * 0.5,
-                child: Container(
-                  width: size,
-                  height: size,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF34D399).withValues(alpha: 0.3),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }

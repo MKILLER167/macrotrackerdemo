@@ -6,6 +6,7 @@ import '../cubits/language_cubit.dart';
 import '../cubits/theme_cubit.dart';
 import '../l10n/app_localizations.dart';
 import '../models/nutrition_model.dart';
+import '../theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,82 +16,92 @@ class HomeScreen extends StatelessWidget {
     return BlocBuilder<LanguageCubit, LanguageState>(
       builder: (context, langState) {
         final l10n = AppLocalizations(langState.locale);
-
         return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          appBar: _buildAppBar(context, l10n),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+          backgroundColor: AppTheme.bgDark,
+          body: CustomScrollView(
             physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildWelcomeCard(context, l10n),
-                const SizedBox(height: 24),
-                _buildMacrosCard(context, l10n),
-                const SizedBox(height: 24),
-                _buildWaterTracker(context, l10n),
-                const SizedBox(height: 24),
-                _buildRecentMeals(context, l10n),
-              ],
-            ),
+            slivers: [
+              _buildSliverAppBar(context, l10n),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: 20),
+                    _WelcomeCard(l10n: l10n),
+                    const SizedBox(height: 20),
+                    _CalorieRingCard(l10n: l10n),
+                    const SizedBox(height: 20),
+                    _MacroRowCard(l10n: l10n),
+                    const SizedBox(height: 20),
+                    _WaterCard(l10n: l10n),
+                    const SizedBox(height: 20),
+                    _RecentMealsSection(l10n: l10n),
+                  ]),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, AppLocalizations l10n) {
-    return AppBar(
-      title: Text(
-        l10n.translate('home'),
-        style: const TextStyle(fontWeight: FontWeight.bold),
+  SliverAppBar _buildSliverAppBar(BuildContext context, AppLocalizations l10n) {
+    return SliverAppBar(
+      floating: true,
+      snap: true,
+      backgroundColor: AppTheme.bgDark,
+      title: Row(
+        children: [
+          Container(
+            width: 32, height: 32,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [AppTheme.emerald, AppTheme.indigo], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.eco_rounded, size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: 10),
+          const Text('NutriTracker', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppTheme.textPrimary)),
+        ],
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.language),
-          onPressed: () {
-            context.read<LanguageCubit>().toggleLanguage();
-          },
+          icon: const Icon(Icons.language_rounded, color: AppTheme.textSecondary),
+          onPressed: () => context.read<LanguageCubit>().toggleLanguage(),
         ),
         IconButton(
-          icon: const Icon(Icons.dark_mode_outlined),
-          onPressed: () {
-            context.read<ThemeCubit>().toggleTheme();
-          },
+          icon: const Icon(Icons.brightness_medium_rounded, color: AppTheme.textSecondary),
+          onPressed: () => context.read<ThemeCubit>().toggleTheme(),
         ),
+        const SizedBox(width: 8),
       ],
     );
   }
+}
 
-  Widget _buildWelcomeCard(BuildContext context, AppLocalizations l10n) {
+class _WelcomeCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _WelcomeCard({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<UserCubit, UserState>(
       builder: (context, userState) {
-        final user = userState.user?.profile;
-        final name = user?.name ?? 'User';
+        final profile = userState.user?.profile;
+        final name = profile?.name ?? 'There';
+        final plan = userState.activePlan?.nameEn ?? 'Standard Plan';
 
         return Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.secondary,
-              ],
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0F4C35), Color(0xFF0B1D42)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              )
-            ],
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.emerald.withValues(alpha: 0.25), width: 1),
           ),
           child: Row(
             children: [
@@ -99,54 +110,40 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.translate('welcome_back'),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      'Good ${_greeting()} 👋',
+                      style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    Text(name, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+                    const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        color: AppTheme.emerald.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.emerald.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            userState.activePlan?.nameEn ?? 'Standard Plan',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          const Icon(Icons.auto_awesome_rounded, size: 13, color: AppTheme.emerald),
+                          const SizedBox(width: 5),
+                          Text(plan, style: const TextStyle(color: AppTheme.emerald, fontSize: 12, fontWeight: FontWeight.w700)),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                child: const Icon(Icons.person, size: 30, color: Colors.white),
-              )
+              Container(
+                width: 56, height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [AppTheme.emerald, AppTheme.indigo], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: AppTheme.emerald.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 4))],
+                ),
+                child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
+              ),
             ],
           ),
         );
@@ -154,78 +151,82 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMacrosCard(BuildContext context, AppLocalizations l10n) {
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Morning';
+    if (hour < 17) return 'Afternoon';
+    return 'Evening';
+  }
+}
+
+class _CalorieRingCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _CalorieRingCard({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<NutritionCubit, NutritionState>(
-      builder: (context, nutritionState) {
+      builder: (context, nsState) {
         return BlocBuilder<UserCubit, UserState>(
           builder: (context, userState) {
-            final today = nutritionState.today;
-            final targetCalories =
-                userState.user?.profile?.targetCalories ?? 2000;
-            final activePlan = userState.activePlan;
+            final consumed = nsState.today.caloriesConsumed;
+            final target = userState.user?.profile?.targetCalories ?? 2000;
+            final remaining = (target - consumed).clamp(0, target);
+            final progress = (consumed / target).clamp(0.0, 1.0);
 
-            final targetProtein =
-                targetCalories * (activePlan?.proteinRatio ?? 0.2) / 4;
-            final targetCarbs =
-                targetCalories * (activePlan?.carbRatio ?? 0.5) / 4;
-            final targetFat =
-                targetCalories * (activePlan?.fatRatio ?? 0.3) / 9;
-
-            return Card(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.cardDark,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.borderDark),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Text(
-                          l10n.translate('calories'),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                        CircularProgressIndicator(
+                          value: 1.0,
+                          strokeWidth: 10,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.borderDark),
                         ),
-                        Text(
-                          '${today.caloriesConsumed} / $targetCalories kcal',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 10,
+                          strokeCap: StrokeCap.round,
+                          backgroundColor: Colors.transparent,
+                          valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.emerald),
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('$consumed', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                            const Text('kcal', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: (today.caloriesConsumed / targetCalories)
-                            .clamp(0.0, 1.0),
-                        minHeight: 12,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withValues(alpha: 0.1),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).colorScheme.primary),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildMacroRing(context, l10n.translate('protein'),
-                            today.proteinConsumed, targetProtein, Colors.blue),
-                        _buildMacroRing(context, l10n.translate('carbs'),
-                            today.carbsConsumed, targetCarbs, Colors.green),
-                        _buildMacroRing(context, l10n.translate('fat'),
-                            today.fatConsumed, targetFat, Colors.orange),
+                        const Text('Daily Calories', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 4),
+                        Text('$target kcal goal', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 16),
+                        _StatChip(label: 'Consumed', value: '$consumed kcal', color: AppTheme.emerald),
+                        const SizedBox(height: 8),
+                        _StatChip(label: 'Remaining', value: '$remaining kcal', color: AppTheme.indigo),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
@@ -233,108 +234,192 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildMacroRing(BuildContext context, String label, double consumed,
-      double target, Color color) {
-    return Column(
+class _StatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  const _StatChip({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
       children: [
-        SizedBox(
-          height: 60,
-          width: 60,
-          child: CircularProgressIndicator(
-            value: (consumed / (target == 0 ? 1 : target)).clamp(0.0, 1.0),
-            strokeWidth: 6,
-            backgroundColor: color.withValues(alpha: 0.1),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-        Text(
-          '${consumed.toStringAsFixed(0)} / ${target.toStringAsFixed(0)}g',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
+        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+        const Spacer(),
+        Text(value, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w700)),
       ],
     );
   }
+}
 
-  Widget _buildWaterTracker(BuildContext context, AppLocalizations l10n) {
+class _MacroRowCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _MacroRowCard({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<NutritionCubit, NutritionState>(
-      builder: (context, nutritionState) {
+      builder: (context, nsState) {
         return BlocBuilder<UserCubit, UserState>(
           builder: (context, userState) {
-            final targetWater = userState.user?.profile?.targetWaterMl ?? 3000;
-            final consumedWater = nutritionState.today.waterConsumedMl;
+            final today = nsState.today;
+            final target = userState.user?.profile?.targetCalories ?? 2000;
+            final plan = userState.activePlan;
+            final tProtein = target * (plan?.proteinRatio ?? 0.25) / 4;
+            final tCarbs = target * (plan?.carbRatio ?? 0.5) / 4;
+            final tFat = target * (plan?.fatRatio ?? 0.25) / 9;
 
-            return Card(
-              child: InkWell(
-                onTap: () {
-                  context
-                      .read<NutritionCubit>()
-                      .addWater(250); // Add 250ml glass
-                },
-                borderRadius: BorderRadius.circular(24),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
+            return Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.cardDark,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.borderDark),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Macronutrients', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _MacroBar(label: 'Protein', consumed: today.proteinConsumed, target: tProtein, color: const Color(0xFF60A5FA))),
+                      const SizedBox(width: 12),
+                      Expanded(child: _MacroBar(label: 'Carbs', consumed: today.carbsConsumed, target: tCarbs, color: const Color(0xFF34D399))),
+                      const SizedBox(width: 12),
+                      Expanded(child: _MacroBar(label: 'Fat', consumed: today.fatConsumed, target: tFat, color: const Color(0xFFFBBF24))),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MacroBar extends StatelessWidget {
+  final String label;
+  final double consumed;
+  final double target;
+  final Color color;
+  const _MacroBar({required this.label, required this.consumed, required this.target, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = target == 0 ? 0.0 : (consumed / target).clamp(0.0, 1.0);
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
+            Text('${consumed.toStringAsFixed(0)}g', style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            backgroundColor: color.withValues(alpha: 0.12),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text('/ ${target.toStringAsFixed(0)}g', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10)),
+      ],
+    );
+  }
+}
+
+class _WaterCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _WaterCard({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<NutritionCubit, NutritionState>(
+      builder: (context, nsState) {
+        return BlocBuilder<UserCubit, UserState>(
+          builder: (context, userState) {
+            final target = userState.user?.profile?.targetWaterMl ?? 3000;
+            final consumed = nsState.today.waterConsumedMl;
+            final glasses = (consumed / 250).floor();
+            final targetGlasses = (target / 250).ceil();
+            final progress = (consumed / target).clamp(0.0, 1.0);
+
+            return Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.cardDark,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.borderDark),
+              ),
+              child: Column(
+                children: [
+                  Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        width: 42, height: 42,
                         decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
+                          color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.water_drop,
-                            color: Colors.blue, size: 32),
+                        child: const Icon(Icons.water_drop_rounded, color: Color(0xFF60A5FA), size: 22),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              l10n.translate('water_intake'),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            Text(
-                              '$consumedWater / $targetWater ml',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.6),
-                                fontSize: 14,
-                              ),
-                            ),
+                            const Text('Water Intake', style: TextStyle(color: AppTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
+                            Text('$glasses / $targetGlasses glasses', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
                           ],
                         ),
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        child: const IconButton(
-                          icon: Icon(Icons.add, color: Colors.white),
-                          onPressed: null, // Tap handled by InkWell
-                        ),
-                      )
+                      Text('${(consumed / 1000).toStringAsFixed(1)}L', style: const TextStyle(color: Color(0xFF60A5FA), fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 10,
+                      backgroundColor: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF60A5FA)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => context.read<NutritionCubit>().addWater(250),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.3)),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_circle_outline_rounded, color: Color(0xFF60A5FA), size: 18),
+                          SizedBox(width: 8),
+                          Text('Add 250ml glass', style: TextStyle(color: Color(0xFF60A5FA), fontWeight: FontWeight.w700, fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -342,121 +427,103 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildRecentMeals(BuildContext context, AppLocalizations l10n) {
+class _RecentMealsSection extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _RecentMealsSection({required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<NutritionCubit, NutritionState>(
       builder: (context, state) {
         final meals = state.today.meals;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.translate('recent_meals'),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Recent Meals', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w800)),
+                if (meals.isNotEmpty)
+                  Text('${meals.length} logged', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (meals.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.05)),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.restaurant_menu,
-                      size: 48,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.2),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.translate('no_meals'),
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              ...meals.reversed
-                  .take(3)
-                  .map((meal) => _buildMealRow(context, meal)),
+            const SizedBox(height: 14),
+            if (meals.isEmpty) _buildEmptyState() else ...meals.reversed.take(4).map((m) => _MealCard(meal: m)),
           ],
         );
       },
     );
   }
 
-  Widget _buildMealRow(BuildContext context, MealEntry meal) {
+  Widget _buildEmptyState() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
+        color: AppTheme.cardDark,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withValues(alpha: 0.05)),
+        border: Border.all(color: AppTheme.borderDark),
+      ),
+      child: const Column(
+        children: [
+          Icon(Icons.no_meals_rounded, size: 44, color: AppTheme.textSecondary),
+          SizedBox(height: 12),
+          Text('No meals logged yet', style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w500)),
+          SizedBox(height: 4),
+          Text('Tap + to add your first meal', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealCard extends StatelessWidget {
+  final MealEntry meal;
+  const _MealCard({required this.meal});
+
+  @override
+  Widget build(BuildContext context) {
+    final mealColors = {
+      'breakfast': const Color(0xFFFBBF24),
+      'lunch': const Color(0xFF34D399),
+      'dinner': const Color(0xFF818CF8),
+      'snack': const Color(0xFFF87171),
+    };
+    final color = mealColors[meal.mealType.name] ?? AppTheme.emerald;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.cardDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderDark),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .secondary
-                  .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.fastfood,
-                color: Theme.of(context).colorScheme.secondary),
+            width: 44, height: 44,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+            child: Icon(Icons.lunch_dining_rounded, color: color, size: 22),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(meal.name, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 2),
                 Text(
-                  meal.name,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                Text(
-                  '${meal.calories} kcal â€¢ P: ${meal.protein.toStringAsFixed(0)}g',
-                  style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                    fontSize: 13,
-                  ),
+                  'P ${meal.protein.toStringAsFixed(0)}g  •  C ${meal.carbs.toStringAsFixed(0)}g  •  F ${meal.fat.toStringAsFixed(0)}g',
+                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
                 ),
               ],
             ),
           ),
+          Text('${meal.calories}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w800, fontSize: 17)),
+          const Text(' kcal', style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
         ],
       ),
     );

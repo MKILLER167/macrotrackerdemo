@@ -4,6 +4,7 @@ import '../cubits/nutrition_cubit.dart';
 import '../cubits/language_cubit.dart';
 import '../l10n/app_localizations.dart';
 import '../models/nutrition_model.dart';
+import '../theme/app_theme.dart';
 import '../widgets/quick_add_food_dialog.dart';
 
 class MealsScreen extends StatelessWidget {
@@ -17,11 +18,34 @@ class MealsScreen extends StatelessWidget {
         final isAr = langState.isArabic;
 
         return Scaffold(
+          backgroundColor: AppTheme.bgDark,
           appBar: AppBar(
-            title: Text(
-              l10n.translate('meals'),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            backgroundColor: AppTheme.bgDark,
+            title: Text(l10n.translate('meals')),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: GestureDetector(
+                  onTap: () => _showAddMealDialog(context, langState),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.emerald.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.emerald.withValues(alpha: 0.4)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add_rounded, size: 18, color: AppTheme.emerald),
+                        SizedBox(width: 4),
+                        Text('Add', style: TextStyle(color: AppTheme.emerald, fontWeight: FontWeight.w700, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           body: BlocBuilder<NutritionCubit, NutritionState>(
             builder: (context, nutritionState) {
@@ -34,36 +58,15 @@ class MealsScreen extends StatelessWidget {
               }
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildDailySummary(context, today, l10n),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => QuickAddFoodDialog(
-                              languageCode: langState.locale,
-                              onFoodAdded: (food) {
-                                context.read<NutritionCubit>().addMeal(food);
-                              },
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.add),
-                        label: Text(l10n.translate('add_meal')),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                    _DailySummaryCard(today: today),
+                    const SizedBox(height: 20),
                     ...MealType.values.map((type) {
                       final typeMeals = mealsByType[type] ?? [];
-                      return _buildMealTypeSection(
-                          context, type, typeMeals, isAr);
+                      return _MealTypeSection(type: type, meals: typeMeals, isAr: isAr, onAdd: () => _showAddMealDialog(context, langState));
                     }),
                   ],
                 ),
@@ -75,259 +78,258 @@ class MealsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDailySummary(
-      BuildContext context, DailyNutrition stats, AppLocalizations l10n) {
+  void _showAddMealDialog(BuildContext context, LanguageState langState) {
+    showDialog(
+      context: context,
+      builder: (ctx) => QuickAddFoodDialog(
+        languageCode: langState.locale,
+        onFoodAdded: (food) => context.read<NutritionCubit>().addMeal(food),
+      ),
+    );
+  }
+}
+
+class _DailySummaryCard extends StatelessWidget {
+  final DailyNutrition today;
+  const _DailySummaryCard({required this.today});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withValues(alpha: 0.05)),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F4C35), Color(0xFF0B1D42)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.emerald.withValues(alpha: 0.25)),
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildSummaryItem(
-                  context,
-                  Icons.local_fire_department,
-                  stats.caloriesConsumed.toString(),
-                  l10n.translate('calories')),
-              _buildSummaryItem(context, Icons.restaurant_menu,
-                  stats.meals.length.toString(), l10n.translate('meals')),
+              _SummaryItem(label: 'Calories', value: '${today.caloriesConsumed}', unit: 'kcal', color: AppTheme.emerald),
+              _Divider(),
+              _SummaryItem(label: 'Meals', value: '${today.meals.length}', unit: 'logged', color: const Color(0xFF818CF8)),
+              _Divider(),
+              _SummaryItem(label: 'Water', value: (today.waterConsumedMl / 1000).toStringAsFixed(1), unit: 'liters', color: const Color(0xFF60A5FA)),
             ],
           ),
-          const SizedBox(height: 16),
-          Divider(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.1)),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
+          const Divider(color: Color(0x22FFFFFF), height: 0),
+          const SizedBox(height: 18),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMacroItem(context, l10n.translate('protein'),
-                  stats.proteinConsumed, Colors.blue),
-              _buildMacroItem(context, l10n.translate('carbs'),
-                  stats.carbsConsumed, Colors.green),
-              _buildMacroItem(context, l10n.translate('fat'), stats.fatConsumed,
-                  Colors.orange),
+              Expanded(child: _MacroChip(label: 'Protein', value: today.proteinConsumed, color: const Color(0xFF60A5FA))),
+              const SizedBox(width: 8),
+              Expanded(child: _MacroChip(label: 'Carbs', value: today.carbsConsumed, color: AppTheme.emerald)),
+              const SizedBox(width: 8),
+              Expanded(child: _MacroChip(label: 'Fat', value: today.fatConsumed, color: const Color(0xFFFBBF24))),
             ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSummaryItem(
-      BuildContext context, IconData icon, String value, String label) {
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.15));
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final String unit;
+  final Color color;
+  const _SummaryItem({required this.label, required this.value, required this.unit, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
+        Text(value, style: TextStyle(color: color, fontSize: 24, fontWeight: FontWeight.w800)),
+        Text(unit, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }
+}
 
-  Widget _buildMacroItem(
-      BuildContext context, String label, double value, Color color) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '${value.toStringAsFixed(1)}g',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-      ],
-    );
-  }
+class _MacroChip extends StatelessWidget {
+  final String label;
+  final double value;
+  final Color color;
+  const _MacroChip({required this.label, required this.value, required this.color});
 
-  Widget _buildMealTypeSection(
-      BuildContext context, MealType type, List<MealEntry> meals, bool isAr) {
-    final mealTypeNames = {
-      MealType.breakfast: isAr ? 'Ø§Ù„Ø¥ÙØ·Ø§Ø±' : 'Breakfast',
-      MealType.lunch: isAr ? 'Ø§Ù„ØºØ¯Ø§Ø¡' : 'Lunch',
-      MealType.dinner: isAr ? 'Ø§Ù„Ø¹Ø´Ø§Ø¡' : 'Dinner',
-      MealType.snack: isAr ? 'ÙˆØ¬Ø¨Ø© Ø®ÙÙŠÙØ©' : 'Snack',
-    };
-
-    final totalCalories =
-        meals.fold<int>(0, (sum, meal) => sum + meal.calories);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                mealTypeNames[type] ?? '',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              if (meals.isNotEmpty)
-                Text(
-                  '$totalCalories kcal',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (meals.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.05)),
-            ),
-            child: Text(
-              isAr ? 'Ù„Ø§ ØªÙˆØ¬Ø¯ ÙˆØ¬Ø¨Ø§Øª' : 'No meals yet',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.5),
-              ),
-            ),
-          )
-        else
-          ...meals.map((meal) => _buildMealCard(context, meal, isAr)),
-      ],
-    );
-  }
-
-  Widget _buildMealCard(BuildContext context, MealEntry meal, bool isAr) {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withValues(alpha: 0.05)),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
+      child: Column(
+        children: [
+          Text('${value.toStringAsFixed(0)}g', style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 15)),
+          Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MealTypeSection extends StatelessWidget {
+  final MealType type;
+  final List<MealEntry> meals;
+  final bool isAr;
+  final VoidCallback onAdd;
+  const _MealTypeSection({required this.type, required this.meals, required this.isAr, required this.onAdd});
+
+  static const _mealIcons = {
+    MealType.breakfast: Icons.wb_sunny_rounded,
+    MealType.lunch: Icons.restaurant_rounded,
+    MealType.dinner: Icons.nightlight_round,
+    MealType.snack: Icons.cookie_rounded,
+  };
+
+  static const _mealColors = {
+    MealType.breakfast: Color(0xFFFBBF24),
+    MealType.lunch: Color(0xFF34D399),
+    MealType.dinner: Color(0xFF818CF8),
+    MealType.snack: Color(0xFFF87171),
+  };
+
+  String _typeName(bool isAr) {
+    if (isAr) {
+      return {
+        MealType.breakfast: 'الإفطار',
+        MealType.lunch: 'الغداء',
+        MealType.dinner: 'العشاء',
+        MealType.snack: 'وجبة خفيفة',
+      }[type] ?? '';
+    }
+    return {
+      MealType.breakfast: 'Breakfast',
+      MealType.lunch: 'Lunch',
+      MealType.dinner: 'Dinner',
+      MealType.snack: 'Snacks',
+    }[type] ?? '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _mealColors[type] ?? AppTheme.emerald;
+    final icon = _mealIcons[type] ?? Icons.restaurant_rounded;
+    final totalCals = meals.fold<int>(0, (sum, m) => sum + m.calories);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Section header
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  meal.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+              Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, color: color, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Text(_typeName(isAr), style: const TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+              if (meals.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+                  child: Text('$totalCals kcal', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
+                ),
+              ],
+              const Spacer(),
+              GestureDetector(
+                onTap: onAdd,
+                child: Container(
+                  width: 28, height: 28,
+                  decoration: BoxDecoration(color: AppTheme.surfaceDark, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppTheme.borderDark)),
+                  child: const Icon(Icons.add_rounded, size: 16, color: AppTheme.textSecondary),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNutrientInfo(context, Icons.local_fire_department,
-                  '${meal.calories}', 'kcal', Colors.orange),
-              _buildNutrientInfo(context, Icons.fitness_center,
-                  '${meal.protein.toStringAsFixed(1)}g', 'P', Colors.blue),
-              _buildNutrientInfo(context, Icons.bakery_dining,
-                  '${meal.carbs.toStringAsFixed(1)}g', 'C', Colors.green),
-              _buildNutrientInfo(context, Icons.water_drop,
-                  '${meal.fat.toStringAsFixed(1)}g', 'F', Colors.purple),
-            ],
-          ),
+          const SizedBox(height: 10),
+          if (meals.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              decoration: BoxDecoration(
+                color: AppTheme.cardDark,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.borderDark),
+              ),
+              child: Text(
+                'Tap + to log a meal',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+              ),
+            )
+          else
+            ...meals.map((meal) => _MealEntryCard(meal: meal, color: color)),
         ],
       ),
     );
   }
+}
 
-  Widget _buildNutrientInfo(BuildContext context, IconData icon, String value,
-      String label, Color color) {
-    return Column(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+class _MealEntryCard extends StatelessWidget {
+  final MealEntry meal;
+  final Color color;
+  const _MealEntryCard({required this.meal, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppTheme.cardDark,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.borderDark),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(meal.name, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
+                Text(
+                  'P ${meal.protein.toStringAsFixed(0)}g  •  C ${meal.carbs.toStringAsFixed(0)}g  •  F ${meal.fat.toStringAsFixed(0)}g',
+                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
           ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('${meal.calories}', style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.w800)),
+              const Text('kcal', style: TextStyle(color: AppTheme.textSecondary, fontSize: 10)),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
