@@ -95,13 +95,9 @@ class _WelcomeCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0F4C35), Color(0xFF0B1D42)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppTheme.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.emerald.withValues(alpha: 0.25), width: 1),
+            border: Border.all(color: AppTheme.border2),
           ),
           child: Row(
             children: [
@@ -119,16 +115,16 @@ class _WelcomeCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: AppTheme.emerald.withValues(alpha: 0.15),
+                        color: AppTheme.faint,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.emerald.withValues(alpha: 0.3)),
+                        border: Border.all(color: AppTheme.border2),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.auto_awesome_rounded, size: 13, color: AppTheme.emerald),
+                          const Icon(Icons.auto_awesome_rounded, size: 13, color: AppTheme.white),
                           const SizedBox(width: 5),
-                          Text(plan, style: const TextStyle(color: AppTheme.emerald, fontSize: 12, fontWeight: FontWeight.w700)),
+                          Text(plan, style: const TextStyle(color: AppTheme.white, fontSize: 12, fontWeight: FontWeight.w700)),
                         ],
                       ),
                     ),
@@ -138,11 +134,11 @@ class _WelcomeCard extends StatelessWidget {
               Container(
                 width: 56, height: 56,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppTheme.emerald, AppTheme.indigo], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  color: AppTheme.surface,
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: AppTheme.emerald.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 4))],
+                  border: Border.all(color: AppTheme.border2, width: 1.5),
                 ),
-                child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
+                child: const Icon(Icons.person_rounded, color: AppTheme.white, size: 28),
               ),
             ],
           ),
@@ -220,9 +216,9 @@ class _CalorieRingCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text('$target kcal goal', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.w700)),
                         const SizedBox(height: 16),
-                        _StatChip(label: 'Consumed', value: '$consumed kcal', color: AppTheme.emerald),
+                        _StatChip(label: 'Consumed', value: '$consumed kcal', color: AppTheme.white),
                         const SizedBox(height: 8),
-                        _StatChip(label: 'Remaining', value: '$remaining kcal', color: AppTheme.indigo),
+                        _StatChip(label: 'Remaining', value: '$remaining kcal', color: AppTheme.muted),
                       ],
                     ),
                   ),
@@ -287,11 +283,11 @@ class _MacroRowCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: _MacroBar(label: 'Protein', consumed: today.proteinConsumed, target: tProtein, color: const Color(0xFF60A5FA))),
+                      Expanded(child: _MacroBar(label: 'Protein', consumed: today.proteinConsumed, target: tProtein, color: AppTheme.white)),
                       const SizedBox(width: 12),
-                      Expanded(child: _MacroBar(label: 'Carbs', consumed: today.carbsConsumed, target: tCarbs, color: const Color(0xFF34D399))),
+                      Expanded(child: _MacroBar(label: 'Carbs', consumed: today.carbsConsumed, target: tCarbs, color: const Color(0xFFCCCCCC))),
                       const SizedBox(width: 12),
-                      Expanded(child: _MacroBar(label: 'Fat', consumed: today.fatConsumed, target: tFat, color: const Color(0xFFFBBF24))),
+                      Expanded(child: _MacroBar(label: 'Fat', consumed: today.fatConsumed, target: tFat, color: const Color(0xFF999999))),
                     ],
                   ),
                 ],
@@ -370,10 +366,10 @@ class _WaterCard extends StatelessWidget {
                       Container(
                         width: 42, height: 42,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+                          color: AppTheme.surface,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.water_drop_rounded, color: Color(0xFF60A5FA), size: 22),
+                        child: const Icon(Icons.water_drop_rounded, color: AppTheme.muted, size: 22),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -385,7 +381,7 @@ class _WaterCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Text('${(consumed / 1000).toStringAsFixed(1)}L', style: const TextStyle(color: Color(0xFF60A5FA), fontSize: 18, fontWeight: FontWeight.w800)),
+                      Text('${(consumed / 1000).toStringAsFixed(1)}L', style: const TextStyle(color: AppTheme.white, fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -394,8 +390,8 @@ class _WaterCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 10,
-                      backgroundColor: const Color(0xFF3B82F6).withValues(alpha: 0.12),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF60A5FA)),
+                      backgroundColor: AppTheme.faint,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.white),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -405,16 +401,16 @@ class _WaterCard extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                        color: AppTheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.3)),
+                        border: Border.all(color: AppTheme.border2),
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_circle_outline_rounded, color: Color(0xFF60A5FA), size: 18),
+                          Icon(Icons.add_circle_outline_rounded, color: AppTheme.white, size: 18),
                           SizedBox(width: 8),
-                          Text('Add 250ml glass', style: TextStyle(color: Color(0xFF60A5FA), fontWeight: FontWeight.w700, fontSize: 14)),
+                          Text('Add 250ml glass', style: TextStyle(color: AppTheme.white, fontWeight: FontWeight.w700, fontSize: 14)),
                         ],
                       ),
                     ),
@@ -485,28 +481,21 @@ class _MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mealColors = {
-      'breakfast': const Color(0xFFFBBF24),
-      'lunch': const Color(0xFF34D399),
-      'dinner': const Color(0xFF818CF8),
-      'snack': const Color(0xFFF87171),
-    };
-    final color = mealColors[meal.mealType.name] ?? AppTheme.emerald;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.cardDark,
+        color: AppTheme.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.borderDark),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Row(
         children: [
           Container(
             width: 44, height: 44,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
-            child: Icon(Icons.lunch_dining_rounded, color: color, size: 22),
+            decoration: BoxDecoration(color: AppTheme.surface, borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.lunch_dining_rounded, color: AppTheme.muted, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(

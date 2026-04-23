@@ -123,11 +123,10 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             Container(
               width: 80, height: 80,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppTheme.emerald, AppTheme.indigo], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                color: AppTheme.surface,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppTheme.emerald.withValues(alpha: 0.4), blurRadius: 24)],
               ),
-              child: const Icon(Icons.science_rounded, color: Colors.white, size: 38),
+              child: const Icon(Icons.science_rounded, color: AppTheme.white, size: 38),
             ),
             const SizedBox(height: 28),
             const Text('Calculating Your Plan', style: TextStyle(color: AppTheme.textPrimary, fontSize: 22, fontWeight: FontWeight.w800)),
@@ -198,7 +197,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
           ),
           child: Text(
             _currentPage == _totalPages - 1 ? 'Calculate My Plan 🚀' : 'Continue',
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.black),
           ),
         ),
       ),
@@ -365,11 +364,11 @@ class _GoalStep extends StatelessWidget {
           const SizedBox(height: 8),
           const Text('What do you want\nto achieve?', style: TextStyle(color: AppTheme.textPrimary, fontSize: 30, fontWeight: FontWeight.w800, height: 1.2)),
           const SizedBox(height: 28),
-          _GoalCard(goalType: GoalType.loseWeight, icon: Icons.trending_down_rounded, label: 'Lose Weight', subtitle: '-500 kcal daily deficit', color: const Color(0xFF60A5FA), selected: goal == GoalType.loseWeight, onTap: () { onGoalChanged(GoalType.loseWeight); if (targetWeight >= currentWeight) onTargetWeightChanged((currentWeight - 5).clamp(30, 200)); }),
+          _GoalCard(goalType: GoalType.loseWeight, icon: Icons.trending_down_rounded, label: 'Lose Weight', subtitle: '-500 kcal daily deficit', color: AppTheme.white, selected: goal == GoalType.loseWeight, onTap: () { onGoalChanged(GoalType.loseWeight); if (targetWeight >= currentWeight) onTargetWeightChanged((currentWeight - 5).clamp(30, 200)); }),
           const SizedBox(height: 10),
-          _GoalCard(goalType: GoalType.maintain, icon: Icons.compare_arrows_rounded, label: 'Maintain Weight', subtitle: 'Keep current weight', color: AppTheme.emerald, selected: goal == GoalType.maintain, onTap: () => onGoalChanged(GoalType.maintain)),
+          _GoalCard(goalType: GoalType.maintain, icon: Icons.compare_arrows_rounded, label: 'Maintain Weight', subtitle: 'Keep current weight', color: const Color(0xFFCCCCCC), selected: goal == GoalType.maintain, onTap: () => onGoalChanged(GoalType.maintain)),
           const SizedBox(height: 10),
-          _GoalCard(goalType: GoalType.gainMuscle, icon: Icons.trending_up_rounded, label: 'Gain Muscle', subtitle: '+300 kcal surplus', color: const Color(0xFFA78BFA), selected: goal == GoalType.gainMuscle, onTap: () { onGoalChanged(GoalType.gainMuscle); if (targetWeight <= currentWeight) onTargetWeightChanged((currentWeight + 5).clamp(30, 200)); }),
+          _GoalCard(goalType: GoalType.gainMuscle, icon: Icons.trending_up_rounded, label: 'Gain Muscle', subtitle: '+300 kcal surplus', color: const Color(0xFF999999), selected: goal == GoalType.gainMuscle, onTap: () { onGoalChanged(GoalType.gainMuscle); if (targetWeight <= currentWeight) onTargetWeightChanged((currentWeight + 5).clamp(30, 200)); }),
           if (goal != GoalType.maintain) ...[
             const SizedBox(height: 28),
             _SliderRow(label: 'Target Weight', value: '${targetWeight.round()}', unit: 'kg', min: 30, max: 200, current: targetWeight, onChanged: onTargetWeightChanged),
@@ -474,24 +473,24 @@ class _ActivityStep extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppTheme.emerald.withValues(alpha: 0.1) : AppTheme.cardDark,
+                    color: isSelected ? AppTheme.white.withValues(alpha: 0.08) : AppTheme.card,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: isSelected ? AppTheme.emerald : AppTheme.borderDark, width: isSelected ? 2 : 1),
+                    border: Border.all(color: isSelected ? AppTheme.white : AppTheme.border, width: isSelected ? 2 : 1),
                   ),
                   child: Row(
                     children: [
-                      Icon(level.icon, color: isSelected ? AppTheme.emerald : AppTheme.textSecondary, size: 24),
+                      Icon(level.icon, color: isSelected ? AppTheme.white : AppTheme.muted, size: 24),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(level.label, style: TextStyle(color: isSelected ? AppTheme.emerald : AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 15)),
-                            Text(level.subtitle, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                            Text(level.label, style: TextStyle(color: isSelected ? AppTheme.white : AppTheme.white, fontWeight: FontWeight.w700, fontSize: 15)),
+                            Text(level.subtitle, style: const TextStyle(color: AppTheme.muted, fontSize: 12)),
                           ],
                         ),
                       ),
-                      if (isSelected) const Icon(Icons.check_circle_rounded, color: AppTheme.emerald, size: 22),
+                      if (isSelected) const Icon(Icons.check_circle_rounded, color: AppTheme.white, size: 22),
                     ],
                   ),
                 ),
@@ -529,11 +528,11 @@ class _ConfirmStep extends StatelessWidget {
           Container(
             width: 100, height: 100,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppTheme.emerald, AppTheme.indigo], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              color: AppTheme.surface,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: AppTheme.emerald.withValues(alpha: 0.5), blurRadius: 30, spreadRadius: 2)],
+              border: Border.all(color: AppTheme.border2, width: 2),
             ),
-            child: const Icon(Icons.check_rounded, color: Colors.white, size: 52),
+            child: const Icon(Icons.check_rounded, color: AppTheme.white, size: 52),
           ),
           const SizedBox(height: 28),
           Text('Ready, ${name.isEmpty ? "Champion" : name}!', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 32, fontWeight: FontWeight.w800)),
@@ -553,11 +552,11 @@ class _ConfirmStep extends StatelessWidget {
             ),
             child: const Column(
               children: [
-                Row(children: [Icon(Icons.auto_awesome_rounded, color: AppTheme.emerald, size: 18), SizedBox(width: 10), Text('Personalized calorie targets', style: TextStyle(color: AppTheme.textPrimary))]),
-                SizedBox(height: 12),
-                Row(children: [Icon(Icons.auto_awesome_rounded, color: AppTheme.indigo, size: 18), SizedBox(width: 10), Text('Macro split optimization', style: TextStyle(color: AppTheme.textPrimary))]),
-                SizedBox(height: 12),
-                Row(children: [Icon(Icons.auto_awesome_rounded, color: Color(0xFFFBBF24), size: 18), SizedBox(width: 10), Text('Timeline to your goal weight', style: TextStyle(color: AppTheme.textPrimary))]),
+                Row(children: [const Icon(Icons.check_circle_outline_rounded, color: AppTheme.white, size: 18), const SizedBox(width: 10), const Text('Personalized calorie targets', style: TextStyle(color: AppTheme.white))]),
+                const SizedBox(height: 12),
+                Row(children: [const Icon(Icons.check_circle_outline_rounded, color: AppTheme.muted, size: 18), const SizedBox(width: 10), const Text('Macro split optimization', style: TextStyle(color: AppTheme.white))]),
+                const SizedBox(height: 12),
+                Row(children: [const Icon(Icons.check_circle_outline_rounded, color: AppTheme.muted, size: 18), const SizedBox(width: 10), const Text('Timeline to your goal weight', style: TextStyle(color: AppTheme.white))]),
               ],
             ),
           ),
