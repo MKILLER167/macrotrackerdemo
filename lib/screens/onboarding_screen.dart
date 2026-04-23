@@ -14,24 +14,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   static const _pages = [
     _OPage(
-      gradient: [Color(0xFF003D2B), Color(0xFF080E1A)],
-      glow: AppTheme.mint,
+      gradient: [Color(0xFF141414), Color(0xFF0A0A0A)],
+      glow: AppTheme.white,
       icon: Icons.restaurant_menu_rounded,
       tag: 'TRACK FOOD',
       title: 'Log every\nbite, instantly',
       body: 'Search millions of foods or scan a barcode to track calories and macros in seconds.',
     ),
     _OPage(
-      gradient: [Color(0xFF1B1050), Color(0xFF080E1A)],
-      glow: AppTheme.violet,
+      gradient: [Color(0xFF111111), Color(0xFF0A0A0A)],
+      glow: Color(0xFFCCCCCC),
       icon: Icons.water_drop_rounded,
       tag: 'STAY HYDRATED',
       title: 'Hit your water\ngoal daily',
       body: 'Smart reminders and one-tap glass logging keep you perfectly hydrated all day long.',
     ),
     _OPage(
-      gradient: [Color(0xFF1E0A20), Color(0xFF080E1A)],
-      glow: AppTheme.lilac,
+      gradient: [Color(0xFF0E0E0E), Color(0xFF0A0A0A)],
+      glow: Color(0xFFAAAAAA),
       icon: Icons.insights_rounded,
       tag: 'SEE PROGRESS',
       title: 'Watch your\nbody transform',

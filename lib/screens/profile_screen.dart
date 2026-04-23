@@ -181,10 +181,10 @@ class _BodyMetricsCard extends StatelessWidget {
     return 'Obese';
   }
   Color get _bmiColor {
-    if (_bmi < 18.5) return const Color(0xFF60A5FA);
-    if (_bmi < 25) return AppTheme.emerald;
-    if (_bmi < 30) return const Color(0xFFFBBF24);
-    return const Color(0xFFF87171);
+    if (_bmi < 18.5) return AppTheme.muted;
+    if (_bmi < 25)   return AppTheme.white;
+    if (_bmi < 30)   return const Color(0xFFCCCCCC);
+    return AppTheme.error;
   }
 
   @override

@@ -32,10 +32,9 @@ class GuideScreen extends StatelessWidget {
                 _DietPlanSelector(isAr: isAr),
                 const SizedBox(height: 28),
                 _SectionHeader(title: isAr ? 'نصائح التغذية' : 'Nutrition Tips'),
-                const SizedBox(height: 16),
-                _TipCard(
+                                _TipCard(
                   icon: Icons.water_drop_rounded,
-                  color: const Color(0xFF60A5FA),
+                  color: AppTheme.white,
                   title: isAr ? 'اشرب الماء قبل الوجبات' : 'Drink Water Before Meals',
                   desc: isAr
                       ? 'يساعد شرب كوب من الماء قبل الوجبات على الهضم والشعور بالشبع بشكل أسرع.'
@@ -43,7 +42,7 @@ class GuideScreen extends StatelessWidget {
                 ),
                 _TipCard(
                   icon: Icons.wb_sunny_rounded,
-                  color: const Color(0xFFFBBF24),
+                  color: const Color(0xFFCCCCCC),
                   title: isAr ? 'لا تفوت وجبة الإفطار' : 'Don\'t Skip Breakfast',
                   desc: isAr
                       ? 'الإفطار الصحي يمنحك الطاقة لبدء يومك بشكل صحيح.'
@@ -51,7 +50,7 @@ class GuideScreen extends StatelessWidget {
                 ),
                 _TipCard(
                   icon: Icons.restaurant_rounded,
-                  color: AppTheme.emerald,
+                  color: const Color(0xFFAAAAAA),
                   title: isAr ? 'التحكم في الحصص الغذائية' : 'Portion Control',
                   desc: isAr
                       ? 'استخدم أطباقاً أصغر حجماً لتجنب الإفراط في تناول الطعام.'
@@ -59,7 +58,7 @@ class GuideScreen extends StatelessWidget {
                 ),
                 _TipCard(
                   icon: Icons.fitness_center_rounded,
-                  color: const Color(0xFFA78BFA),
+                  color: const Color(0xFF888888),
                   title: isAr ? 'البروتين مع كل وجبة' : 'Protein With Every Meal',
                   desc: isAr
                       ? 'البروتين يساعد على الشعور بالشبع لفترة أطول ودعم بناء العضلات.'
@@ -67,8 +66,12 @@ class GuideScreen extends StatelessWidget {
                 ),
                 _TipCard(
                   icon: Icons.nightlight_round,
-                  color: const Color(0xFFF87171),
+                  color: const Color(0xFF666666),
                   title: isAr ? 'تجنب الأكل المتأخر' : 'Avoid Late Night Eating',
+                  desc: isAr
+                      ? 'تناول الطعام قبل النوم بساعتين على الأقل يحسن جودة النوم والهضم.'
+                      : 'Eating at least 2 hours before bed improves sleep quality and promotes better digestion.',
+                ),�ب الأكل المتأخر' : 'Avoid Late Night Eating',
                   desc: isAr
                       ? 'تناول الطعام قبل النوم بساعتين على الأقل يحسن جودة النوم والهضم.'
                       : 'Eating at least 2 hours before bed improves sleep quality and promotes better digestion.',
@@ -90,7 +93,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 4, height: 22, decoration: BoxDecoration(color: AppTheme.emerald, borderRadius: BorderRadius.circular(2))),
+        Container(width: 4, height: 22, decoration: BoxDecoration(color: AppTheme.white, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 10),
         Text(title, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 20, fontWeight: FontWeight.w800)),
       ],

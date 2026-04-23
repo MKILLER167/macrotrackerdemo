@@ -2,43 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppTheme {
-  // ── Palette ──────────────────────────────────────────────────────────────
-  static const bg        = Color(0xFF080E1A);   // near-black navy
-  static const surface   = Color(0xFF0E1726);   // card base
-  static const card      = Color(0xFF121F30);   // slightly elevated card
-  static const border    = Color(0xFF1C2E44);   // subtle divider
-  static const border2   = Color(0xFF243550);   // a bit more visible
+  // ── Pure Black & White Palette ────────────────────────────────────────────
+  static const bg        = Color(0xFF0A0A0A);   // true near-black
+  static const surface   = Color(0xFF111111);   // slightly lifted
+  static const card      = Color(0xFF161616);   // card background
+  static const border    = Color(0xFF252525);   // subtle border
+  static const border2   = Color(0xFF333333);   // more visible border
 
-  static const mint      = Color(0xFF00E5A0);   // neon mint primary
-  static const mintMid   = Color(0xFF00C48C);   // mid shade
-  static const mintDim   = Color(0xFF00A876);   // deeper
+  // Accent whites
+  static const white     = Color(0xFFFFFFFF);   // pure white primary
+  static const white90   = Color(0xFFE8E8E8);   // warm off-white
+  static const muted     = Color(0xFF888888);   // muted grey
+  static const faint     = Color(0xFF222222);   // barely-there surface
 
-  static const violet    = Color(0xFF7B61FF);   // secondary violet
-  static const violetMid = Color(0xFF6048E8);
+  // Semantic colours (minimal, desaturated)
+  static const accent    = Color(0xFFFFFFFF);   // primary accent = white
+  static const accentDim = Color(0xFF333333);   // dim version for backgrounds
+  static const error     = Color(0xFFFF3B3B);   // only colour allowed = critical error
 
-  static const sky        = Color(0xFF38BDF8);   // Info blue
-  static const amber      = Color(0xFFFBBF24);   // Warning amber
-  static const rose       = Color(0xFFF43F5E);   // Error rose
-  static const lilac      = Color(0xFFA78BFA);   // purple accent
+  // ── Removed colour tokens kept as aliases ─────────────────────────────────
+  // All former "mint/violet/amber/rose" references now map to white/grey
+  static const mint      = white;
+  static const mintMid   = white90;
+  static const mintDim   = muted;
+  static const violet    = muted;
+  static const violetMid = muted;
+  static const sky       = white90;
+  static const amber     = white90;
+  static const rose      = error;
+  static const lilac     = muted;
+  static const faintTint = faint;
 
-  static const white  = Color(0xFFF0F8FF);       // text primary
-  static const muted  = Color(0xFF7A96B0);       // text muted
-  static const faint  = Color(0xFF2B4060);       // barely-there tint
+  // ── Backward-compat aliases ───────────────────────────────────────────────
+  static const emerald       = white;
+  static const emeraldLight  = white90;
+  static const indigo        = muted;
+  static const indigoLight   = muted;
+  static const bgDark        = bg;
+  static const surfaceDark   = surface;
+  static const cardDark      = card;
+  static const borderDark    = border;
+  static const textPrimary   = white;
+  static const textSecondary = muted;
 
-  // ── Gradients (static shortcuts) ─────────────────────────────────────────
-  static const mintGrad    = LinearGradient(colors: [mint, violet], begin: Alignment.topLeft,  end: Alignment.bottomRight);
-  static const darkMintGrad= LinearGradient(colors: [mintMid, violet], begin: Alignment.topLeft, end: Alignment.bottomRight);
-  static const nightGrad   = LinearGradient(colors: [Color(0xFF0E1726), Color(0xFF080E1A)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
-
-  // ── Card decoration helper ─────────────────────────────────────────────────
+  // ── Card helper ───────────────────────────────────────────────────────────
   static BoxDecoration cardBox({Color? color, bool glow = false, Color? glowColor}) {
     return BoxDecoration(
       color: color ?? card,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: border, width: 1),
-      boxShadow: glow ? [
-        BoxShadow(color: (glowColor ?? mint).withValues(alpha: 0.18), blurRadius: 24, spreadRadius: 0, offset: const Offset(0, 4)),
-      ] : null,
     );
   }
 
@@ -47,22 +59,22 @@ class AppTheme {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: surface,
+      systemNavigationBarColor: bg,
       systemNavigationBarIconBrightness: Brightness.light,
     ));
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: mint,
+      primaryColor: white,
       scaffoldBackgroundColor: bg,
       colorScheme: const ColorScheme.dark(
-        primary:    mint,
-        secondary:  violet,
+        primary:    white,
+        secondary:  muted,
         surface:    surface,
         onSurface:  white,
         onPrimary:  Colors.black,
-        error:      rose,
+        error:      error,
         onError:    Colors.white,
       ),
       // ── AppBar
@@ -90,10 +102,10 @@ class AppTheme {
           side: const BorderSide(color: border, width: 1),
         ),
       ),
-      // ── ElevatedButton → neon pill
+      // ── ElevatedButton → white pill with black text
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: mint,
+          backgroundColor: white,
           foregroundColor: Colors.black,
           disabledBackgroundColor: faint,
           disabledForegroundColor: muted,
@@ -104,7 +116,7 @@ class AppTheme {
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.2),
         ),
       ),
-      // ── OutlinedButton → ghost border
+      // ── OutlinedButton → white border ghost
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: white,
@@ -117,7 +129,7 @@ class AppTheme {
       // ── TextButton
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: mint,
+          foregroundColor: white,
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
       ),
@@ -129,26 +141,26 @@ class AppTheme {
         labelStyle: const TextStyle(color: muted, fontSize: 15),
         prefixIconColor: muted,
         suffixIconColor: muted,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: border)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: border)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: mint, width: 1.5)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: rose)),
+        border:         OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: border)),
+        enabledBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: border)),
+        focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: white, width: 1.5)),
+        errorBorder:    OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: error)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       ),
       // ── Divider
       dividerTheme: const DividerThemeData(color: border, thickness: 1, space: 0),
       // ── Slider
       sliderTheme: SliderThemeData(
-        activeTrackColor: mint,
+        activeTrackColor: white,
         inactiveTrackColor: faint,
-        thumbColor: Colors.white,
-        overlayColor: mint.withValues(alpha: 0.12),
+        thumbColor: white,
+        overlayColor: Colors.white.withValues(alpha: 0.08),
         trackHeight: 4,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
       ),
       // ── ProgressIndicator
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: mint,
+        color: white,
         linearTrackColor: faint,
         circularTrackColor: faint,
       ),
@@ -163,16 +175,4 @@ class AppTheme {
   }
 
   static ThemeData get lightTheme => darkTheme;
-
-  // ── Backward-compatible aliases (old → new) ────────────────────────────────
-  static const emerald      = mint;
-  static const emeraldLight = mint;
-  static const indigo       = violet;
-  static const indigoLight  = violetMid;
-  static const bgDark       = bg;
-  static const surfaceDark  = surface;
-  static const cardDark     = card;
-  static const borderDark   = border;
-  static const textPrimary  = white;
-  static const textSecondary = muted;
 }
