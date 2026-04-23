@@ -55,6 +55,9 @@ class UserCubit extends Cubit<UserState> {
           gender: Gender.male,
           height: 180,
           weight: 75,
+          goal: GoalType.maintain,
+          targetWeight: 75,
+          activityLevel: ActivityLevel.moderatelyActive,
           dietPlan: DietPlanType.intermittentFasting,
           targetCalories: 2200,
           targetWaterMl: 3000,
@@ -96,5 +99,36 @@ class UserCubit extends Cubit<UserState> {
 
     emit(state.copyWith(
         user: updatedUser, activePlan: DietPlanService.getPlan(newType)));
+  }
+
+  Future<void> completeOnboarding(UserProfile profile) async {
+    final newUser = UserModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      isGuest: false,
+      isOnboarded: true,
+      subscriptionTier: SubscriptionTier.free,
+      createdAt: DateTime.now(),
+      profile: profile,
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_model', json.encode(newUser.toJson()));
+
+    final newStats = state.stats?.copyWith(userId: newUser.id) ??
+        UserStats(
+          userId: newUser.id,
+          level: 1,
+          xp: 0,
+          streakDays: 0,
+          totalMealsLogged: 0,
+          totalWaterLogged: 0,
+          achievements: const [],
+          lastActiveDate: DateTime.now(),
+        );
+
+    emit(UserState(
+        user: newUser,
+        stats: newStats,
+        activePlan: DietPlanService.getPlan(profile.dietPlan)));
   }
 }

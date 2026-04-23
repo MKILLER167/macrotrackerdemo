@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubits/user_cubit.dart';
+import '../models/user_model.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final UserProfile? generatedProfile;
+
+  const LoginScreen({super.key, this.generatedProfile});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -33,6 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
+    if (widget.generatedProfile != null) {
+      context.read<UserCubit>().completeOnboarding(widget.generatedProfile!);
+    }
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const MainScreen()),
     );
@@ -44,6 +53,10 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(const Duration(seconds: 1));
 
     if (!mounted) return;
+
+    if (widget.generatedProfile != null) {
+      context.read<UserCubit>().completeOnboarding(widget.generatedProfile!);
+    }
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const MainScreen()),

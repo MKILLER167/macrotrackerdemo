@@ -6,6 +6,16 @@ enum Gender { male, female, other }
 
 enum DietPlanType { standard, keto, intermittentFasting, highProtein, vegan }
 
+enum GoalType { loseWeight, maintain, gainMuscle }
+
+enum ActivityLevel {
+  sedentary,
+  lightlyActive,
+  moderatelyActive,
+  veryActive,
+  extraActive
+}
+
 @immutable
 class UserProfile {
   final String name;
@@ -13,6 +23,9 @@ class UserProfile {
   final Gender gender;
   final double height; // in cm
   final double weight; // in kg
+  final GoalType goal;
+  final double targetWeight; // in kg
+  final ActivityLevel activityLevel;
   final DietPlanType dietPlan;
   final int targetCalories;
   final int targetWaterMl;
@@ -24,6 +37,9 @@ class UserProfile {
     required this.gender,
     required this.height,
     required this.weight,
+    required this.goal,
+    required this.targetWeight,
+    required this.activityLevel,
     required this.dietPlan,
     required this.targetCalories,
     required this.targetWaterMl,
@@ -36,6 +52,9 @@ class UserProfile {
     Gender? gender,
     double? height,
     double? weight,
+    GoalType? goal,
+    double? targetWeight,
+    ActivityLevel? activityLevel,
     DietPlanType? dietPlan,
     int? targetCalories,
     int? targetWaterMl,
@@ -47,6 +66,9 @@ class UserProfile {
       gender: gender ?? this.gender,
       height: height ?? this.height,
       weight: weight ?? this.weight,
+      goal: goal ?? this.goal,
+      targetWeight: targetWeight ?? this.targetWeight,
+      activityLevel: activityLevel ?? this.activityLevel,
       dietPlan: dietPlan ?? this.dietPlan,
       targetCalories: targetCalories ?? this.targetCalories,
       targetWaterMl: targetWaterMl ?? this.targetWaterMl,
@@ -61,6 +83,9 @@ class UserProfile {
       'gender': gender.index,
       'height': height,
       'weight': weight,
+      'goal': goal.index,
+      'targetWeight': targetWeight,
+      'activityLevel': activityLevel.index,
       'dietPlan': dietPlan.index,
       'targetCalories': targetCalories,
       'targetWaterMl': targetWaterMl,
@@ -75,6 +100,10 @@ class UserProfile {
       gender: Gender.values[json['gender'] as int],
       height: (json['height'] as num).toDouble(),
       weight: (json['weight'] as num).toDouble(),
+      goal: GoalType.values[json['goal'] as int? ?? 1],
+      targetWeight: (json['targetWeight'] as num?)?.toDouble() ??
+          (json['weight'] as num).toDouble(),
+      activityLevel: ActivityLevel.values[json['activityLevel'] as int? ?? 0],
       dietPlan: DietPlanType.values[json['dietPlan'] as int],
       targetCalories: json['targetCalories'] as int,
       targetWaterMl: json['targetWaterMl'] as int? ?? 2500,
